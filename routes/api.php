@@ -31,6 +31,10 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
+
+// get the floor with unites
+Route::get('/floorplan/unit/collections/kiosk', [FloorPlanController::class, 'unitCollections']);
+
 // allow accessing images
 Route::get('/storage/{path}', function ($path) {
     $file = storage_path('app/public/' . $path);
