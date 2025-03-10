@@ -4,6 +4,9 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FloorPlanController;
+use App\Http\Controllers\MostVisitedController;
+use App\Http\Controllers\TeacherController;
+use App\Models\Teacher;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +30,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/floorplan/units', [FloorPlanController::class, 'storeFacilites']);
     // get the floor with unites
     Route::get('/floorplan/unit/collections', [FloorPlanController::class, 'unitCollections']);
+
+    //get floor for adding new teacher
+    Route::get('/floorplan', [TeacherController::class, 'getFloor']);
+    Route::post('/create-teacher', [TeacherController::class, 'createTeacher']);
+    Route::get('/getTeacher', [TeacherController::class, 'getTeacher']);
+    
 });
+// analytics
+Route::post('/unit-search',[MostVisitedController::class, 'clickedUnit']);
+Route::get('/analytics',[MostVisitedController::class, 'analyticsForMostVisited']);
+
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
