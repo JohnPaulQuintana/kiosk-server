@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,19 +31,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/floorplan/units', [FloorPlanController::class, 'storeFacilites']);
     // get the floor with unites
     Route::get('/floorplan/unit/collections', [FloorPlanController::class, 'unitCollections']);
+    Route::post('/floorplan/unit/update/{id}', [FloorPlanController::class, 'update']);
 
     //get floor for adding new teacher
     Route::get('/floorplan', [TeacherController::class, 'getFloor']);
     Route::post('/create-teacher', [TeacherController::class, 'createTeacher']);
+    Route::post('/update-teacher/{id}', [TeacherController::class, 'updateTeacher']);
+    Route::delete('/delete-teacher/{id}', [TeacherController::class, 'deleteTeacher']);
     Route::get('/getTeacher', [TeacherController::class, 'getTeacher']);
-    
+
+    // announcement
+    Route::post('/announcement', [AnnouncementController::class, 'store']);
+
+    Route::post('/announcement/{id}', [AnnouncementController::class, 'update']);
+    Route::delete('/announcement/{id}', [AnnouncementController::class, 'destroy']);
+
 });
+
+//announcement
+Route::get('/announcement', [AnnouncementController::class, 'getData']);
 // analytics
 Route::post('/unit-search',[MostVisitedController::class, 'clickedUnit']);
 Route::get('/analytics',[MostVisitedController::class, 'analyticsForMostVisited']);
 
-Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('reset-password', [AuthController::class, 'resetPassword']);
+Route::post('reset-password', [AuthController::class, 'sendResetLink']);
+Route::post('reset', [AuthController::class, 'reset']);
 
 
 // get the floor with unites

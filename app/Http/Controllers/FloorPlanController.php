@@ -43,22 +43,22 @@ class FloorPlanController extends Controller
         $uploadedFile = $request->input('uploadedFile');
         $groups = $request->input('facilities');
         $floor = $request->input('floor');
-        
+
         $initial = Floorplan::create([
-            "floor"=>$floor,
-            "filename"=>$uploadedFile[0]['fileName'],
-            "filepath"=>$uploadedFile[0]['filePath']
+            "floor" => $floor,
+            "filename" => $uploadedFile[0]['fileName'],
+            "filepath" => $uploadedFile[0]['filePath']
         ]);
 
-        if($initial){
+        if ($initial) {
             // save the units for this floor
             foreach ($groups as $key => $group) {
                 FloorplanUnit::create([
-                    'floorplan_id'=> $initial->id,
-                    'unit'=>$group['name'],
-                    'door'=>$group['id'],
-                    'availability'=>$group['availability'],
-                    'old_unit'=>$group['name'],
+                    'floorplan_id' => $initial->id,
+                    'unit' => $group['name'],
+                    'door' => $group['id'],
+                    'availability' => $group['availability'],
+                    'old_unit' => $group['name'],
                 ]);
             }
             return response()->json([
@@ -67,7 +67,7 @@ class FloorPlanController extends Controller
                 'uploadedFile' => $uploadedFile,
                 'message' => 'Facilities saved successfully!',
             ]);
-        }else{
+        } else {
             return response()->json([
                 'floor' => $floor,
                 'facilities' => $groups,
@@ -75,17 +75,48 @@ class FloorPlanController extends Controller
                 'message' => 'Something went wrong on the server or it\'s not valid information!',
             ]);
         }
-        
     }
 
     public function unitCollections(Request $request)
     {
         // Fetch paginated data and include the relationship (e.g., 'rooms')
-        $units = Floorplan::with('units') // 'rooms' is the name of the relationship
+        $units = Floorplan::with('units.teachers') // 'rooms' is the name of the relationship
             // ->where('floor',$request->input('currentFloor'))
             ->paginate(10); // Paginate with 10 items per page
 
         // Return the paginated data with child relationships as JSON
         return response()->json($units);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $unit = FloorplanUnit::findOrFail($id);
+
+        $validated = $request->validate([
+            'unit' => 'required|string|max:255',
+            'availability' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        // Manually convert string "true"/"false" to boolean
+        $validated['availability'] = filter_var($validated['availability'], FILTER_VALIDATE_BOOLEAN);
+
+
+        $unit->unit = $validated['unit'];
+        $unit->availability = $validated['availability'];
+
+        if ($request->hasFile('image')) {
+            // Delete old image if needed
+            if ($unit->image && Storage::exists($unit->image)) {
+                Storage::delete($unit->image);
+            }
+
+            $path = $request->file('image')->store('public/unit');
+            $unit->image = $path;
+        }
+
+        $unit->save();
+
+        return response()->json(['message' => 'Unit updated successfully']);
     }
 }
